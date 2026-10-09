@@ -26,11 +26,13 @@ class HasilSawExport implements
 {
     protected $periodeId;
     protected $periode;
+    protected $divisi;
 
-    public function __construct(int $periodeId)
+    public function __construct(int $periodeId, $divisi = null)
     {
         $this->periodeId = $periodeId;
         $this->periode   = Periode::find($periodeId);
+        $this->divisi    = $divisi;
     }
 
     /**
@@ -39,7 +41,7 @@ class HasilSawExport implements
 public function collection(): Collection 
     {
         // PERBAIKAN 1: Tambahkan withTrashed() pada relasi karyawan
-        $data = HasilSaw::with([
+        $query = HasilSaw::with([
                 'karyawan' => function($q) {
                     $q->withTrashed();
                 }, 
@@ -48,15 +50,24 @@ public function collection(): Collection
             // PERBAIKAN 2: Gunakan whereHas yang kebal terhadap soft delete dengan withTrashed()
             ->whereHas('karyawan', function($query) {
                 $query->withTrashed(); // Memastikan record lama tetap divalidasi walau sudah dihapus
+                if ($this->divisi) {
+                    if ($this->divisi === 'Tanpa Divisi') {
+                        $query->whereNull('divisi')->orWhere('divisi', '');
+                    } else {
+                        $query->where('divisi', $this->divisi);
+                    }
+                }
             })
-            ->where('periode_id', $this->periodeId)
-            ->orderBy('peringkat')
+            ->where('periode_id', $this->periodeId);
+
+        $data = $query->orderBy('peringkat')
             ->get()
             ->map(fn($h) => [
                 'peringkat'    => $h->peringkat,
                 'nip'          => $h->nip,
                 // Di sini nama akan tercetak sempurna karena datanya berhasil ditarik via withTrashed()
                 'nama'         => $h->karyawan?->nama ?? $h->karyawan?->nama_karyawan ?? 'Karyawan Tidak Ditemukan',
+                'divisi'       => $h->karyawan?->divisi ?? '-',
                 'nilai_akhir'  => number_format($h->nilai_akhir, 2),
                 'sanksi'       => $h->sanksi?->keterangan ?? '-',
                 'jumlah_alpa'  => $h->sanksi?->jumlah_alpa ?? 0,
@@ -74,6 +85,7 @@ public function collection(): Collection
             'Peringkat',
             'NIP',
             'Nama Pegawai',
+            'Divisi',
             'Nilai Akhir',
             'Keterangan Sanksi',
             'Jumlah Alpa (hari)',
@@ -92,10 +104,11 @@ public function collection(): Collection
             'A' => 10,
             'B' => 20,
             'C' => 35,
-            'D' => 15,
-            'E' => 20,
-            'F' => 18,
-            'G' => 20,
+            'D' => 20,
+            'E' => 15,
+            'F' => 20,
+            'G' => 18,
+            'H' => 20,
         ];
     }
 
@@ -106,7 +119,7 @@ public function collection(): Collection
         $lastRow = $count + 4; // Menyesuaikan dengan insertNewRowBefore(1, 3)
 
         // Style header tabel (Sekarang di baris 4 karena ada judul di baris 1-2)
-        $sheet->getStyle('A4:G4')->applyFromArray([
+        $sheet->getStyle('A4:H4')->applyFromArray([
             'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
             'fill' => [
                 'fillType'   => Fill::FILL_SOLID,
@@ -116,7 +129,7 @@ public function collection(): Collection
         ]);
 
         // Border untuk semua sel data
-        $sheet->getStyle("A4:G{$lastRow}")->applyFromArray([
+        $sheet->getStyle("A4:H{$lastRow}")->applyFromArray([
             'borders' => [
                 'allBorders' => [
                     'borderStyle' => Border::BORDER_THIN,
@@ -137,12 +150,13 @@ public function collection(): Collection
 
                 // Tambah baris judul di baris paling atas
                 $sheet->insertNewRowBefore(1, 3);
-                $sheet->mergeCells('A1:G1');
+                $sheet->mergeCells('A1:H1');
                 $sheet->setCellValue('A1', 'LAPORAN HASIL PENILAIAN KEDISPLINAN PEGAWAI - METODE SAW');
                 
-                $sheet->mergeCells('A2:G2');
+                $sheet->mergeCells('A2:H2');
                 $teksPeriode = $periode ? "{$periode->bulan} / {$periode->tahun}" : "Semua Periode";
-                $sheet->setCellValue('A2', "Periode: " . $teksPeriode);
+                $teksDivisi = $this->divisi ? " | Divisi: {$this->divisi}" : " | Semua Divisi";
+                $sheet->setCellValue('A2', "Periode: " . $teksPeriode . $teksDivisi);
 
                 $sheet->getStyle('A1:A2')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
                 $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);

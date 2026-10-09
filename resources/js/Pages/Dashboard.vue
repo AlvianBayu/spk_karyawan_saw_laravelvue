@@ -151,89 +151,63 @@ onMounted(() => {
 </script>
 
 <template>
-    <Head title="" />
+    <Head title="Dashboard - SIKAP" />
     <MainLayout>
-        <div class="p-6 bg-white rounded-lg shadow-md">
+        <div class="p-6 sm:p-8 bg-white/80 backdrop-blur-md rounded-2xl shadow-xl border border-gray-100/50">
 
-            <div class="mb-5">
-                <h1 class="text-xl font-semibold text-gray-900">Dashboard</h1>
-                <p class="text-sm text-gray-500 mt-0.5">
-                    Sistem Informasi Kedisiplinan Absensi Pegawai · Metode SAW
-                </p>
-                <div class="inline-flex items-center gap-1.5 mt-2 text-xs px-3 py-1
-                            rounded-full bg-green-100 text-green-700 font-medium
-                            border border-green-200">
-                    <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
-                    Periode aktif: {{ namaPeriode }}
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-4 border-b border-gray-100 pb-6">
+                <div>
+                    <h1 class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-700 to-indigo-600 tracking-tight">Dashboard Analitik</h1>
+                    <p class="text-sm text-gray-500 mt-2 font-medium">Sistem Informasi Kedisiplinan Absensi Pegawai · Metode SAW</p>
+                </div>
+                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-50 text-emerald-700 font-semibold border border-emerald-100 shadow-sm">
+                    <span class="relative flex h-3 w-3">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+                    </span>
+                    Periode Aktif: {{ namaPeriode }}
                 </div>
             </div>
 
-            <div class="grid grid-cols-4 gap-3 mb-5">
-                <div class="bg-slate-50 border border-gray-200 rounded-xl px-4 py-3 relative overflow-hidden">
-                    <div class="text-xs text-gray-400 uppercase tracking-wide font-medium">
-                        Total Pegawai
-                    </div>
-                    <div class="text-2xl font-semibold text-gray-900 mt-1">
-                        {{ totalKaryawan }}
-                    </div>
-                    <div class="text-xs text-gray-400 mt-0.5">Terdaftar di sistem</div>
-                    <div class="absolute right-3 top-3 w-8 h-8 rounded-lg bg-blue-50
-                                flex items-center justify-center">
-                        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="#3B6DDD" stroke-width="1.5">
-                            <circle cx="6" cy="5" r="3"/>
-                            <path d="M1 14c0-3 2.5-5 5-5s5 2 5 5"/>
-                            <circle cx="12" cy="5" r="2"/>
-                            <path d="M14 14c0-2-1-3.5-2-4"/>
-                        </svg>
+            <!-- STATS CARDS -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                <div class="bg-gradient-to-br from-white to-slate-50 border border-gray-100 rounded-2xl p-5 relative overflow-hidden shadow-sm hover:shadow-md transition-shadow group">
+                    <div class="absolute -right-6 -top-6 w-24 h-24 bg-blue-50 rounded-full blur-xl group-hover:bg-blue-100 transition-colors"></div>
+                    <div class="text-xs text-gray-500 uppercase tracking-wider font-bold mb-1 relative z-10">Total Pegawai</div>
+                    <div class="text-3xl font-extrabold text-gray-900 mb-1 relative z-10">{{ totalKaryawan }}</div>
+                    <div class="text-xs text-gray-400 font-medium relative z-10">Terdaftar di sistem</div>
+                    <div class="absolute right-4 top-4 w-10 h-10 rounded-xl bg-blue-100/50 flex items-center justify-center text-blue-600 shadow-sm">
+                        <i class="fa-solid fa-users"></i>
                     </div>
                 </div>
 
-                <div class="bg-slate-50 border border-gray-200 rounded-xl px-4 py-3 relative overflow-hidden">
-                    <div class="text-xs text-gray-400 uppercase tracking-wide font-medium">
-                        Total Periode
-                    </div>
-                    <div class="text-2xl font-semibold text-green-600 mt-1">
-                        {{ totalPeriode }}
-                    </div>
-                    <div class="text-xs text-gray-400 mt-0.5">Periode sudah dinilai</div>
-                    <div class="absolute right-3 top-3 w-8 h-8 rounded-lg bg-green-50
-                                flex items-center justify-center">
-                        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="#639922" stroke-width="1.5">
-                            <rect x="1" y="3" width="14" height="12" rx="2"/>
-                            <path d="M1 7h14M5 1v4M11 1v4"/>
-                        </svg>
+                <div class="bg-gradient-to-br from-white to-emerald-50/30 border border-gray-100 rounded-2xl p-5 relative overflow-hidden shadow-sm hover:shadow-md transition-shadow group">
+                    <div class="absolute -right-6 -top-6 w-24 h-24 bg-emerald-50 rounded-full blur-xl group-hover:bg-emerald-100 transition-colors"></div>
+                    <div class="text-xs text-gray-500 uppercase tracking-wider font-bold mb-1 relative z-10">Total Periode</div>
+                    <div class="text-3xl font-extrabold text-emerald-600 mb-1 relative z-10">{{ totalPeriode }}</div>
+                    <div class="text-xs text-gray-400 font-medium relative z-10">Periode sudah dinilai</div>
+                    <div class="absolute right-4 top-4 w-10 h-10 rounded-xl bg-emerald-100/50 flex items-center justify-center text-emerald-600 shadow-sm">
+                        <i class="fa-regular fa-calendar-check"></i>
                     </div>
                 </div>
 
-                <div class="bg-slate-50 border border-gray-200 rounded-xl px-4 py-3 relative overflow-hidden">
-                    <div class="text-xs text-gray-400 uppercase tracking-wide font-medium">
-                        Rata-rata nilai SAW
-                    </div>
-                    <div class="text-2xl font-semibold text-blue-600 mt-1">
-                        {{ Number(rataRataAktif).toFixed(2) }}
-                    </div>
-                    <div class="text-xs text-gray-400 mt-0.5">Periode aktif</div>
-                    <div class="absolute right-3 top-3 w-8 h-8 rounded-lg bg-blue-50
-                                flex items-center justify-center">
-                        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="#378ADD" stroke-width="1.5">
-                            <path d="M2 12l4-4 3 3 5-6" stroke-linecap="round"/>
-                        </svg>
+                <div class="bg-gradient-to-br from-white to-indigo-50/30 border border-gray-100 rounded-2xl p-5 relative overflow-hidden shadow-sm hover:shadow-md transition-shadow group">
+                    <div class="absolute -right-6 -top-6 w-24 h-24 bg-indigo-50 rounded-full blur-xl group-hover:bg-indigo-100 transition-colors"></div>
+                    <div class="text-xs text-gray-500 uppercase tracking-wider font-bold mb-1 relative z-10">Rata-rata SAW Aktif</div>
+                    <div class="text-3xl font-extrabold text-indigo-600 mb-1 relative z-10">{{ Number(rataRataAktif).toFixed(2) }}</div>
+                    <div class="text-xs text-gray-400 font-medium relative z-10">Pada periode ini</div>
+                    <div class="absolute right-4 top-4 w-10 h-10 rounded-xl bg-indigo-100/50 flex items-center justify-center text-indigo-600 shadow-sm">
+                        <i class="fa-solid fa-chart-pie"></i>
                     </div>
                 </div>
 
-                <div class="bg-slate-50 border border-gray-200 rounded-xl px-4 py-3 relative overflow-hidden">
-                    <div class="text-xs text-gray-400 uppercase tracking-wide font-medium">
-                        Rata-rata keseluruhan
-                    </div>
-                    <div class="text-2xl font-semibold text-purple-600 mt-1">
-                        {{ Number(rataRataKeseluruhan).toFixed(2) }}
-                    </div>
-                    <div class="text-xs text-gray-400 mt-0.5">Semua periode</div>
-                    <div class="absolute right-3 top-3 w-8 h-8 rounded-lg bg-purple-50
-                                flex items-center justify-center">
-                        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="#7c3aed" stroke-width="1.5">
-                            <path d="M2 8h12M8 2v12" stroke-linecap="round"/>
-                        </svg>
+                <div class="bg-gradient-to-br from-white to-purple-50/30 border border-gray-100 rounded-2xl p-5 relative overflow-hidden shadow-sm hover:shadow-md transition-shadow group">
+                    <div class="absolute -right-6 -top-6 w-24 h-24 bg-purple-50 rounded-full blur-xl group-hover:bg-purple-100 transition-colors"></div>
+                    <div class="text-xs text-gray-500 uppercase tracking-wider font-bold mb-1 relative z-10">Rata-rata Global</div>
+                    <div class="text-3xl font-extrabold text-purple-600 mb-1 relative z-10">{{ Number(rataRataKeseluruhan).toFixed(2) }}</div>
+                    <div class="text-xs text-gray-400 font-medium relative z-10">Dari seluruh periode</div>
+                    <div class="absolute right-4 top-4 w-10 h-10 rounded-xl bg-purple-100/50 flex items-center justify-center text-purple-600 shadow-sm">
+                        <i class="fa-solid fa-ranking-star"></i>
                     </div>
                 </div>
             </div>
@@ -296,44 +270,58 @@ onMounted(() => {
 
             <div class="grid grid-cols-2 gap-4">
 
-                <div class="border border-gray-200 rounded-xl overflow-hidden flex flex-col">
-                    <div class="px-4 py-3 border-b border-gray-100 flex items-center justify-between bg-white">
-                        <span class="text-sm font-medium text-gray-800">Ranking periode aktif</span>
-                        <a href="/saw/hasil" class="text-xs text-blue-500 hover:underline">
-                            Lihat detail →
+                <div class="border border-gray-200 rounded-2xl overflow-hidden flex flex-col shadow-sm bg-white">
+                    <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between bg-slate-50/50">
+                        <div class="flex items-center gap-2">
+                            <i class="fa-solid fa-trophy text-amber-500"></i>
+                            <span class="text-sm font-bold text-gray-800">Ranking Periode Aktif</span>
+                        </div>
+                        <a href="/saw/hasil" class="text-xs font-semibold text-blue-600 hover:text-blue-800 transition-colors">
+                            Lihat Laporan Detail &rarr;
                         </a>
                     </div>
                     <div class="flex-1 overflow-x-auto">
                         <table class="w-full">
-                            <thead class="bg-slate-100">
+                            <thead class="bg-slate-50/80 border-b border-gray-100">
                                 <tr>
-                                    <th class="text-gray-600 font-semibold text-xs uppercase tracking-wide py-3 px-4 text-left w-10">No</th>
-                                    <th class="text-gray-600 font-semibold text-xs uppercase tracking-wide py-3 text-left">Karyawan</th>
-                                    <th class="text-center text-gray-600 font-semibold text-xs uppercase tracking-wide py-3">Nilai</th>
+                                    <th class="text-gray-500 font-bold text-[10px] uppercase tracking-wider py-3 px-4 text-center w-14">Rank</th>
+                                    <th class="text-gray-500 font-bold text-[10px] uppercase tracking-wider py-3 px-4 text-left">Pegawai</th>
+                                    <th class="text-gray-500 font-bold text-[10px] uppercase tracking-wider py-3 px-4 text-left">Divisi</th>
+                                    <th class="text-gray-500 font-bold text-[10px] uppercase tracking-wider py-3 px-4 text-center">Nilai Akhir</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                <tr v-for="h in paginatedHasil" :key="h.nip"
-                                    class="border-b border-gray-100 last:border-0 hover:bg-gray-50 bg-white">
-                                    <td class="px-4 py-2.5 text-center">
-                                        <span class="inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-medium"
+                            <tbody class="divide-y divide-gray-50">
+                                <tr v-for="h in paginatedHasil" :key="h.nip" class="hover:bg-blue-50/30 transition-colors">
+                                    <td class="px-4 py-3 text-center">
+                                        <span class="inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold"
                                             :class="rankClass(h.peringkat)">
                                             {{ h.peringkat }}
                                         </span>
                                     </td>
-                                    <td class="py-2.5">
-                                        <div class="font-medium text-sm text-gray-900">{{ h.nama }}</div>
+                                    <td class="px-4 py-3">
+                                        <div class="font-bold text-sm text-gray-900">{{ h.nama }}</div>
                                         <div class="text-xs text-gray-400 font-mono mt-0.5">
-                                            {{ h.jabatan }} · #{{ h.nip }}
+                                            {{ h.jabatan }} <span class="mx-1 text-gray-300">|</span> NIP: {{ h.nip }}
                                         </div>
                                     </td>
-                                    <td class="text-center py-2.5 font-semibold text-gray-800 text-sm">
-                                        {{ Number(h.nilai_akhir).toFixed(2) }}
+                                    <td class="px-4 py-3">
+                                        <span v-if="h.karyawan?.divisi" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-100/50">
+                                            {{ h.karyawan.divisi }}
+                                        </span>
+                                        <span v-else class="text-gray-400 text-xs italic">-</span>
+                                    </td>
+                                    <td class="px-4 py-3 text-center">
+                                        <span class="font-bold text-gray-800 text-sm bg-gray-50 px-3 py-1 rounded-lg border border-gray-100">
+                                            {{ Number(h.nilai_akhir).toFixed(4) }}
+                                        </span>
                                     </td>
                                 </tr>
                                 <tr v-if="!paginatedHasil.length">
-                                    <td colspan="3" class="text-center py-8 text-gray-400 text-sm bg-white">
-                                        Belum ada data.
+                                    <td colspan="4" class="text-center py-10 text-gray-400 text-sm">
+                                        <div class="flex flex-col items-center">
+                                            <i class="fa-regular fa-folder-open text-3xl mb-2 text-gray-300"></i>
+                                            Belum ada data penilaian pada periode aktif.
+                                        </div>
                                     </td>
                                 </tr>
                             </tbody>
@@ -355,48 +343,62 @@ onMounted(() => {
                     </div>
                 </div>
 
-                <div class="border border-gray-200 rounded-xl overflow-hidden flex flex-col">
-                    <div class="px-4 py-3 border-b border-gray-100 flex items-center justify-between bg-white">
-                        <span class="text-sm font-medium text-gray-800">
-                            Ranking rata-rata semua periode
-                        </span>
-                        <span class="text-xs text-gray-400">Avg nilai SAW</span>
+                <div class="border border-gray-200 rounded-2xl overflow-hidden flex flex-col shadow-sm bg-white">
+                    <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between bg-slate-50/50">
+                        <div class="flex items-center gap-2">
+                            <i class="fa-solid fa-globe text-indigo-500"></i>
+                            <span class="text-sm font-bold text-gray-800">Ranking Keseluruhan</span>
+                        </div>
+                        <span class="text-[10px] font-semibold tracking-wider text-gray-400 uppercase">Avg Nilai SAW</span>
                     </div>
                     <div class="flex-1 overflow-x-auto">
                         <table class="w-full">
-                            <thead class="bg-slate-100">
+                            <thead class="bg-slate-50/80 border-b border-gray-100">
                                 <tr>
-                                    <th class="text-gray-600 font-semibold text-xs uppercase tracking-wide py-3 px-4 text-left w-10">No</th>
-                                    <th class="text-gray-600 font-semibold text-xs uppercase tracking-wide py-3 text-left">Karyawan</th>
-                                    <th class="text-center text-gray-600 font-semibold text-xs uppercase tracking-wide py-3">Avg</th>
-                                    <th class="text-center text-gray-600 font-semibold text-xs uppercase tracking-wide py-3">Periode</th>
+                                    <th class="text-gray-500 font-bold text-[10px] uppercase tracking-wider py-3 px-4 text-center w-14">Rank</th>
+                                    <th class="text-gray-500 font-bold text-[10px] uppercase tracking-wider py-3 px-4 text-left">Pegawai</th>
+                                    <th class="text-gray-500 font-bold text-[10px] uppercase tracking-wider py-3 px-4 text-left">Divisi</th>
+                                    <th class="text-gray-500 font-bold text-[10px] uppercase tracking-wider py-3 px-4 text-center">Avg Nilai</th>
+                                    <th class="text-gray-500 font-bold text-[10px] uppercase tracking-wider py-3 px-4 text-center">Periode</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                <tr v-for="(h, i) in paginatedRankingKeseluruhan" :key="h.nip"
-                                    class="border-b border-gray-100 last:border-0 hover:bg-gray-50 bg-white">
-                                    <td class="px-4 py-2.5 text-center">
-                                        <span class="inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-medium"
+                            <tbody class="divide-y divide-gray-50">
+                                <tr v-for="(h, i) in paginatedRankingKeseluruhan" :key="h.nip" class="hover:bg-indigo-50/30 transition-colors">
+                                    <td class="px-4 py-3 text-center">
+                                        <span class="inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold"
                                             :class="rankClass((currentPageRata - 1) * ITEMS_PER_PAGE + i + 1)">
                                             {{ (currentPageRata - 1) * ITEMS_PER_PAGE + i + 1 }}
                                         </span>
                                     </td>
-                                    <td class="py-2.5">
-                                        <div class="font-medium text-sm text-gray-900">{{ h.nama }}</div>
-                                        <div class="text-xs text-gray-400 font-mono mt-0.5">
-                                            {{ h.jabatan }}
+                                    <td class="px-4 py-3">
+                                        <div class="font-bold text-sm text-gray-900">{{ h.nama }}</div>
+                                        <div class="text-[11px] text-gray-400 font-mono mt-0.5">
+                                            {{ h.jabatan }} <span class="mx-1 text-gray-300">|</span> NIP: {{ h.nip }}
                                         </div>
                                     </td>
-                                    <td class="text-center py-2.5 font-semibold text-gray-800 text-sm">
-                                        {{ Number(h.avg_nilai).toFixed(2) }}
+                                    <td class="px-4 py-3">
+                                        <span v-if="h.karyawan?.divisi" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-100/50">
+                                            {{ h.karyawan.divisi }}
+                                        </span>
+                                        <span v-else class="text-gray-400 text-xs italic">-</span>
                                     </td>
-                                    <td class="text-center py-2.5 text-xs text-gray-400">
-                                        {{ h.total_periode }}x
+                                    <td class="px-4 py-3 text-center">
+                                        <span class="font-bold text-indigo-700 text-sm bg-indigo-50 px-3 py-1 rounded-lg border border-indigo-100">
+                                            {{ Number(h.avg_nilai).toFixed(4) }}
+                                        </span>
+                                    </td>
+                                    <td class="px-4 py-3 text-center">
+                                        <span class="text-xs font-medium bg-gray-100 text-gray-600 px-2 py-0.5 rounded">
+                                            {{ h.total_periode }}x
+                                        </span>
                                     </td>
                                 </tr>
                                 <tr v-if="!paginatedRankingKeseluruhan.length">
-                                    <td colspan="4" class="text-center py-8 text-gray-400 text-sm bg-white">
-                                        Belum ada data.
+                                    <td colspan="5" class="text-center py-10 text-gray-400 text-sm">
+                                        <div class="flex flex-col items-center">
+                                            <i class="fa-regular fa-folder-open text-3xl mb-2 text-gray-300"></i>
+                                            Belum ada data history penilaian.
+                                        </div>
                                     </td>
                                 </tr>
                             </tbody>

@@ -19,6 +19,7 @@ class PimpinanLaporanController extends Controller
         $periodeList = Periode::orderBy('tahun')->orderBy('bulan')->get();
 
         $hasil = collect();
+        $divisiList = collect();
 
         if ($periodeId) {
             // PERBAIKAN: Menghapus filter status 'Aktif' agar karyawan resign bulan lalu tetap muncul
@@ -30,6 +31,7 @@ class PimpinanLaporanController extends Controller
             $hasil = $hasilRaw->map(fn($h) => [
                 'nip'         => $h->nip,
                 'nama'        => $h->karyawan?->nama ?? $h->karyawan?->nama_karyawan ?? '-',
+                'divisi'      => $h->karyawan?->divisi ?? '-',
                 'jabatan'     => $h->karyawan?->jabatan ?? '-',
                 'nilai_akhir' => $h->nilai_akhir,
                 'peringkat'   => $h->peringkat,
@@ -37,6 +39,13 @@ class PimpinanLaporanController extends Controller
                 'jumlah_alpa' => $h->sanksi?->jumlah_alpa ?? 0,
                 'potongan'    => $h->sanksi?->potongan_persen ?? 0,
             ]);
+
+            // Daftar divisi unik dari hasil
+            $divisiList = $hasil->pluck('divisi')
+                ->filter(fn($d) => $d && $d !== '-')
+                ->unique()
+                ->sort()
+                ->values();
         }
 
 
@@ -44,6 +53,7 @@ class PimpinanLaporanController extends Controller
             'hasil'       => $hasil,
             'periodeList' => $periodeList,
             'periodeId'   => $periodeId,
+            'divisiList'  => $divisiList,
         ]);
     }
 

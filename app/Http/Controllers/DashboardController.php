@@ -14,10 +14,9 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        // Periode terbaru otomatis
-        $periode = Periode::orderBy('tahun', 'desc')
-            ->orderBy('bulan', 'desc')
-            ->first();
+        // Periode terbaru yang sudah ada hasil perhitungannya
+        $periode = Periode::whereHas('hasilSaw')->orderBy('id', 'desc')->first() 
+            ?? Periode::orderBy('id', 'desc')->first();
 
         $periodeId = $periode?->id;
 

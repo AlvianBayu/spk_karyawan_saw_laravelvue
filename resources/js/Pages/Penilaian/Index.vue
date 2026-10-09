@@ -77,8 +77,8 @@ function adaOverIndependenEdit() {
 }
 
 function saveEdit() {
-    // Validasi ketat disamakan dengan Controller (Harus tepat TOTAL_HARI & tidak boleh over di kriteria independen)
-    if (totalAkumulasiEdit() !== TOTAL_HARI.value || adaOverIndependenEdit()) return
+    // Validasi: akumulasi tidak boleh melebihi batas dan independen juga tidak boleh melebihi batas
+    if (totalAkumulasiEdit() > TOTAL_HARI.value || adaOverIndependenEdit()) return
     
     editForm.put(`/penilaian/${selectedKaryawan.value.nip}`, {
         onSuccess: () => closeModal()
@@ -97,38 +97,37 @@ function getNilai(penilaianArr, kode) {
 </script>
 
 <template>
-    <Head title="" />
+    <Head title="Data Penilaian - SIKAP" />
 
     <MainLayout>
-        <div class="p-6 bg-white rounded-lg shadow-md">
+        <div class="p-6 sm:p-8 bg-white/80 backdrop-blur-md rounded-2xl shadow-xl border border-gray-100/50">
 
             <!-- Header -->
-            <div class="flex items-start justify-between mb-6 flex-wrap gap-3">
+            <div class="flex flex-col md:flex-row items-start justify-between mb-8 pb-6 border-b border-gray-100 gap-4">
                 <div>
-                    <h1 class="text-xl font-semibold text-gray-900">Data Absensi Pegawai</h1>
-                    <p class="text-sm text-gray-500 mt-1">
+                    <h1 class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-700 to-indigo-600 tracking-tight flex items-center gap-3">
+                        Data Absensi Pegawai
+                    </h1>
+                    <p class="text-sm text-gray-500 mt-2 font-medium">
                         <span v-if="periodeTerpilih">
-                            Menampilkan data penilaian · 
-                            <strong class="text-gray-700">
+                            Menampilkan data input penilaian periode 
+                            <strong class="text-gray-800 bg-gray-100 px-2 py-0.5 rounded ml-0.5">
                                 {{ periodeTerpilih.bulan }} {{ periodeTerpilih.tahun }}
                             </strong>
                         </span>
                         <span v-else>Pilih periode untuk melihat data yang sudah diinput</span>
                     </p>
                 </div>
-                <div class="flex items-center gap-2">
-                    <div class="relative">
-                        <svg class="absolute left-3 top-2.5 w-3.5 h-3.5 text-gray-400 pointer-events-none"
-                            viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
-                            <rect x="1" y="3" width="14" height="12" rx="2"/>
-                            <path d="M1 7h14M5 1v4M11 1v4"/>
-                        </svg>
+                <div class="flex items-center gap-3">
+                    <div class="relative group">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fa-regular fa-calendar-days text-gray-400 group-hover:text-blue-500 transition-colors"></i>
+                        </div>
                         <select v-model="periodeId"
-                            class="select select-bordered select-sm pl-8 min-w-[180px] bg-white
-                                   text-gray-800 border-gray-300 shadow-sm focus:border-blue-500">
+                            class="select bg-white text-gray-800 border-gray-200 shadow-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 pl-10 min-w-[200px] h-11 rounded-xl font-medium">
                             <option value="">-- Pilih Periode --</option>
                             <option v-for="p in periodeList" :key="p.id" :value="p.id">
-                                {{ p.bulan }} / {{ p.tahun }}
+                                {{ p.bulan }} {{ p.tahun }}
                             </option>
                         </select>
                     </div>
@@ -137,26 +136,16 @@ function getNilai(penilaianArr, kode) {
 
             <!-- Empty State -->
             <div v-if="!periodeId"
-                class="flex flex-col items-center justify-center py-24 text-center">
-                <div class="w-14 h-14 rounded-2xl bg-indigo-50 flex items-center justify-center mb-4">
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none"
-                        stroke="#4F46E5" stroke-width="1.5">
-                        <rect x="3" y="4" width="18" height="18" rx="2"/>
-                        <path d="M3 9h18M9 4v5M15 4v5"/>
-                        <path d="M8 13h2M8 17h6" stroke-linecap="round"/>
-                    </svg>
+                class="flex flex-col items-center justify-center py-20 text-center bg-slate-50/50 rounded-3xl border border-dashed border-gray-200">
+                <div class="w-16 h-16 rounded-2xl bg-indigo-50 flex items-center justify-center mb-4 border border-indigo-100 shadow-sm">
+                    <i class="fa-solid fa-list-check text-2xl text-indigo-500"></i>
                 </div>
-                <h2 class="text-base font-semibold text-gray-800 mb-2">Belum Ada Periode Dipilih</h2>
-                <p class="text-sm text-gray-500 max-w-xs leading-relaxed mb-4">
-                    Pilih periode penilaian dari dropdown di atas untuk melihat data input
-                    dan hasil penilaian pegawai.
+                <h2 class="text-lg font-bold text-gray-800 mb-2">Belum Ada Periode Dipilih</h2>
+                <p class="text-sm text-gray-500 max-w-sm leading-relaxed mb-6">
+                    Pilih periode penilaian dari dropdown di atas untuk melihat data input dan hasil penilaian pegawai.
                 </p>
-                <div class="flex items-center gap-1.5 text-xs text-blue-500">
-                    <svg width="12" height="12" viewBox="0 0 12 12" fill="#3B82F6">
-                        <circle cx="6" cy="6" r="6"/>
-                        <path d="M6 5v4M6 3.5h.01" stroke="#fff" stroke-width="1.2"
-                            stroke-linecap="round"/>
-                    </svg>
+                <div class="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-lg text-xs font-semibold border border-blue-100">
+                    <i class="fa-solid fa-circle-info"></i>
                     Tip: Mulai dari periode aktif terbaru
                 </div>
             </div>
@@ -165,98 +154,91 @@ function getNilai(penilaianArr, kode) {
             <template v-else>
 
                 <!-- Stat Cards -->
-                <div class="grid grid-cols-3 gap-3 mb-5">
-                    <div class="bg-slate-50 border border-gray-200 rounded-xl px-4 py-3">
-                        <div class="text-xs text-gray-400 uppercase tracking-wide font-medium">
-                            Total Pegawai Aktif
-                        </div>
-                        <div class="text-xl font-semibold text-gray-900 mt-1">
-                            {{ karyawan.length }}
-                        </div>
-                    </div>
-                    <div class="bg-slate-50 border border-gray-200 rounded-xl px-4 py-3">
-                        <div class="text-xs text-gray-400 uppercase tracking-wide font-medium">
-                            Total Kriteria
-                        </div>
-                        <div class="text-xl font-semibold text-gray-900 mt-1">
-                            {{ kriteria.length }}
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+                    <div class="bg-gradient-to-br from-white to-blue-50/30 border border-gray-100 rounded-2xl p-5 relative overflow-hidden shadow-sm hover:shadow-md transition-shadow group">
+                        <div class="absolute -right-6 -top-6 w-24 h-24 bg-blue-50 rounded-full blur-xl group-hover:bg-blue-100 transition-colors"></div>
+                        <div class="text-[11px] text-gray-500 uppercase tracking-widest font-bold mb-1 relative z-10">Total Pegawai Aktif</div>
+                        <div class="text-3xl font-extrabold text-blue-600 mb-1 relative z-10">{{ karyawan.length }}</div>
+                        <div class="absolute right-4 top-4 w-10 h-10 rounded-xl bg-blue-100/50 flex items-center justify-center text-blue-600 shadow-sm">
+                            <i class="fa-solid fa-users"></i>
                         </div>
                     </div>
-                    <div class="bg-slate-50 border border-gray-200 rounded-xl px-4 py-3">
-                        <div class="text-xs text-gray-400 uppercase tracking-wide font-medium">
-                            Hari Kerja
+                    <div class="bg-gradient-to-br from-white to-emerald-50/30 border border-gray-100 rounded-2xl p-5 relative overflow-hidden shadow-sm hover:shadow-md transition-shadow group">
+                        <div class="absolute -right-6 -top-6 w-24 h-24 bg-emerald-50 rounded-full blur-xl group-hover:bg-emerald-100 transition-colors"></div>
+                        <div class="text-[11px] text-gray-500 uppercase tracking-widest font-bold mb-1 relative z-10">Total Kriteria</div>
+                        <div class="text-3xl font-extrabold text-emerald-600 mb-1 relative z-10">{{ kriteria.length }}</div>
+                        <div class="absolute right-4 top-4 w-10 h-10 rounded-xl bg-emerald-100/50 flex items-center justify-center text-emerald-600 shadow-sm">
+                            <i class="fa-solid fa-list-check"></i>
                         </div>
-                        <div class="text-xl font-semibold text-gray-900 mt-1">
-                            {{ TOTAL_HARI }} hari
+                    </div>
+                    <div class="bg-gradient-to-br from-white to-amber-50/30 border border-gray-100 rounded-2xl p-5 relative overflow-hidden shadow-sm hover:shadow-md transition-shadow group">
+                        <div class="absolute -right-6 -top-6 w-24 h-24 bg-amber-50 rounded-full blur-xl group-hover:bg-amber-100 transition-colors"></div>
+                        <div class="text-[11px] text-gray-500 uppercase tracking-widest font-bold mb-1 relative z-10">Hari Kerja</div>
+                        <div class="text-3xl font-extrabold text-amber-600 mb-1 relative z-10">{{ TOTAL_HARI }}<span class="text-base font-semibold text-amber-600/70 ml-1">hari</span></div>
+                        <div class="absolute right-4 top-4 w-10 h-10 rounded-xl bg-amber-100/50 flex items-center justify-center text-amber-600 shadow-sm">
+                            <i class="fa-regular fa-calendar"></i>
                         </div>
                     </div>
                 </div>
 
                 <!-- Tabel -->
-                <div class="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                <div class="border border-gray-200 rounded-2xl overflow-hidden shadow-sm bg-white">
                     <div class="overflow-x-auto">
-                        <table class="table table-sm w-full">
-                            <thead class="bg-slate-100">
+                        <table class="table w-full">
+                            <thead class="bg-slate-50/80 border-b border-gray-100">
                                 <tr>
-                                    <th class="text-gray-700 font-bold py-3 px-4 text-xs uppercase tracking-wide">
+                                    <th class="text-gray-500 font-bold py-4 px-5 text-[10px] uppercase tracking-widest text-left">
                                         Pegawai
                                     </th>
                                     <th v-for="k in kriteria" :key="k.kode"
-                                        class="text-center py-3 text-xs uppercase tracking-wide text-gray-600 font-bold">
+                                        class="text-center py-4 px-2 text-[10px] uppercase tracking-widest text-gray-500 font-bold">
                                         <div class="flex flex-col items-center gap-1">
                                             {{ k.nama_kriteria }}
                                         </div>
                                     </th>
-                                    <th class="text-center py-3 text-xs uppercase tracking-wide text-gray-600 font-bold">
+                                    <th class="text-center py-4 px-5 text-[10px] uppercase tracking-widest text-gray-500 font-bold w-20">
                                         Aksi
                                     </th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody class="divide-y divide-gray-50">
                                 <tr v-for="kar in karyawan" :key="kar.nip"
-                                    class="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
-                                    <td class="px-4 py-3">
-                                        <div class="font-medium text-sm text-gray-900">
+                                    class="hover:bg-blue-50/30 transition-colors">
+                                    <td class="px-5 py-4">
+                                        <div class="font-bold text-sm text-gray-900">
                                             {{ kar.nama || kar.nama_karyawan }}
                                         </div>
-                                        <div class="text-xs text-gray-400 font-mono mt-0.5">
-                                            {{ kar.jabatan }} · #{{ kar.nip }}
+                                        <div class="text-[11px] text-gray-400 font-mono mt-0.5">
+                                            {{ kar.jabatan }} <span class="mx-1 text-gray-300">|</span> NIP: {{ kar.nip }}
                                         </div>
                                     </td>
                                     <td v-for="k in kriteria" :key="k.kode"
-                                        class="text-center py-3 font-medium text-gray-800">
-                                        {{ getNilai(kar.penilaian, k.kode) }}
+                                        class="text-center py-4 font-semibold text-gray-800 text-sm">
+                                        <div class="inline-flex items-center justify-center min-w-[36px] h-8 rounded-lg bg-gray-50 border border-gray-100">
+                                            {{ getNilai(kar.penilaian, k.kode) }}
+                                        </div>
                                     </td>
-                                    <td class="text-center py-3 px-4">
+                                    <td class="text-center py-4 px-5">
                                         <button
                                             @click="openModal(kar)"
-                                            class="btn btn-sm btn-warning text-black"
+                                            class="w-8 h-8 rounded-lg flex items-center justify-center bg-amber-50 text-amber-600 hover:bg-amber-100 hover:text-amber-700 transition-colors border border-amber-200"
                                             title="Edit">
-                                            <svg xmlns="http://www.w3.org/2000/svg"
-                                                class="h-4 w-4" fill="none" viewBox="0 0 24 24"
-                                                stroke="currentColor" stroke-width="2">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                                            </svg>
+                                            <i class="fa-solid fa-pen-to-square"></i>
                                         </button>
                                     </td>
                                 </tr>
 
                                 <tr v-if="karyawan.length === 0">
                                     <td :colspan="2 + kriteria.length"
-                                        class="text-center py-12 text-gray-400 text-sm">
-                                        <svg class="w-10 h-10 mx-auto mb-3 text-gray-300"
-                                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                stroke-width="1.5"
-                                                d="M9 17v-2m3 2v-4m3 4v-6M5 20h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v11a2 2 0 002 2z"/>
-                                        </svg>
-                                        Belum ada data penilaian untuk periode ini.
-                                        <br>
-                                        <a href="/penilaian/create"
-                                            class="text-blue-500 hover:underline text-xs mt-1 inline-block">
-                                            + Input data sekarang
-                                        </a>
+                                        class="text-center py-12 bg-slate-50/50">
+                                        <div class="flex flex-col items-center justify-center text-gray-400">
+                                            <i class="fa-solid fa-file-circle-xmark text-4xl mb-3 text-gray-300"></i>
+                                            <p class="font-medium">Belum ada data penilaian untuk periode ini.</p>
+                                            <a href="/penilaian/create"
+                                                class="btn btn-sm mt-4 bg-blue-600 hover:bg-blue-700 text-white border-none rounded-lg px-4 shadow-sm">
+                                                + Input Data Sekarang
+                                            </a>
+                                        </div>
                                     </td>
                                 </tr>
                             </tbody>
@@ -269,109 +251,102 @@ function getNilai(penilaianArr, kode) {
 
         <!-- ── MODAL EDIT ── -->
         <div v-if="showModal"
-            class="fixed inset-0 z-50 flex items-center justify-center"
-            style="background:rgba(0,0,0,0.4)"
+            class="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm"
+            style="background:rgba(15, 23, 42, 0.4)"
             @click.self="closeModal">
 
-            <div class="bg-white rounded-2xl shadow-xl w-full max-w-md mx-4 overflow-hidden">
+            <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all border border-gray-100">
 
                 <!-- Modal Header -->
-                <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+                <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-slate-50/50">
                     <div>
-                        <h2 class="text-base font-semibold text-gray-900">
+                        <h2 class="text-lg font-bold text-gray-900 tracking-tight">
                             Edit Data Penilaian
                         </h2>
-                        <p class="text-xs text-gray-400 mt-0.5">
-                            {{ selectedKaryawan?.nama || selectedKaryawan?.nama_karyawan }} ·
-                            {{ periodeTerpilih?.bulan }} {{ periodeTerpilih?.tahun }}
-                            <span class="text-blue-500 font-medium ml-1">
-                                ({{ TOTAL_HARI }} hari kerja)
+                        <p class="text-[11px] text-gray-500 mt-1 uppercase tracking-wider font-semibold">
+                            Periode: {{ periodeTerpilih?.bulan }} {{ periodeTerpilih?.tahun }}
+                            <span class="text-indigo-600 ml-1 bg-indigo-50 px-1.5 py-0.5 rounded">
+                                {{ TOTAL_HARI }} HK
                             </span>
                         </p>
                     </div>
                     <button @click="closeModal"
-                        class="w-7 h-7 flex items-center justify-center rounded-lg
-                               text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors">
-                        <svg width="14" height="14" viewBox="0 0 12 12" fill="none"
-                            stroke="currentColor" stroke-width="2">
-                            <path d="M2 2l8 8M10 2l-8 8" stroke-linecap="round"/>
-                        </svg>
+                        class="w-8 h-8 flex items-center justify-center rounded-xl text-gray-400 hover:text-gray-700 hover:bg-gray-200 transition-colors">
+                        <i class="fa-solid fa-xmark text-lg"></i>
                     </button>
                 </div>
 
                 <!-- Modal Body -->
-                <div class="px-6 py-4 space-y-3 overflow-y-auto max-h-[60vh]">
+                <div class="px-6 py-5 space-y-4 overflow-y-auto max-h-[60vh]">
 
                     <!-- Info Karyawan -->
-                    <div class="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-gray-100">
+                    <div class="flex items-center gap-3 p-3 bg-blue-50/50 rounded-xl border border-blue-100/50">
+                        <div class="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-sm">
+                            {{ selectedKaryawan?.nama?.charAt(0) || selectedKaryawan?.nama_karyawan?.charAt(0) || '?' }}
+                        </div>
                         <div>
-                            <div class="text-sm font-medium text-gray-900">
+                            <div class="text-sm font-bold text-gray-900">
                                 {{ selectedKaryawan?.nama || selectedKaryawan?.nama_karyawan }}
                             </div>
-                            <div class="text-xs text-gray-400 font-mono">
-                                {{ selectedKaryawan?.jabatan }} · #{{ selectedKaryawan?.nip }}
+                            <div class="text-xs text-gray-500 font-mono mt-0.5">
+                                {{ selectedKaryawan?.jabatan }} <span class="mx-1">|</span> NIP: {{ selectedKaryawan?.nip }}
                             </div>
                         </div>
                     </div>
 
                     <!-- Input per Kriteria -->
-                    <div v-for="k in kriteria" :key="k.kode"
-                        class="flex items-center justify-between py-2.5 border-b
-                               border-gray-100 last:border-0">
-                        <div>
-                            <div class="text-sm font-medium text-gray-800">
-                                {{ k.nama_kriteria }}
+                    <div class="space-y-3">
+                        <div v-for="k in kriteria" :key="k.kode"
+                            class="flex items-center justify-between p-3 rounded-xl border border-gray-100 bg-white shadow-sm hover:border-blue-100 transition-colors">
+                            <div>
+                                <div class="text-sm font-semibold text-gray-800">
+                                    {{ k.nama_kriteria }}
+                                </div>
+                                <span
+                                    class="text-[10px] px-2 py-0.5 rounded uppercase tracking-wider font-bold mt-1.5 inline-block"
+                                    :class="k.kelompok === 'Akumulasi'
+                                        ? 'bg-blue-50 text-blue-600'
+                                        : 'bg-purple-50 text-purple-600'">
+                                    {{ k.kelompok }}
+                                </span>
                             </div>
-                            <span
-                                class="text-xs px-2 py-0.5 rounded-full font-medium mt-0.5 inline-block border capitalize"
-                                :class="k.kelompok === 'Akumulasi'
-                                    ? 'bg-blue-50 text-blue-700 border-blue-200'
-                                    : 'bg-purple-50 text-purple-700 border-purple-200'">
-                                {{ k.kelompok }}
-                            </span>
+                            <div class="flex items-center gap-2">
+                                <input
+                                    v-model.number="editForm.nilai[k.kode]"
+                                    type="number"
+                                    min="0"
+                                    class="input input-sm w-20 text-center font-semibold rounded-lg shadow-inner"
+                                    :class="(k.kelompok === 'Akumulasi' && totalAkumulasiEdit() > TOTAL_HARI) || (k.kelompok === 'Independen' && editForm.nilai[k.kode] > TOTAL_HARI)
+                                        ? 'border-red-300 bg-red-50 text-red-700 focus:border-red-500 focus:ring-red-200'
+                                        : 'border-gray-200 bg-gray-50 text-gray-900 focus:border-blue-500 focus:bg-white'"
+                                />
+                                <span class="text-xs font-medium text-gray-400 w-6">
+                                    {{ k.kelompok === 'Independen' ? 'x' : 'hr' }}
+                                </span>
+                            </div>           
                         </div>
-                        <div class="flex items-center gap-2">
-                            <input
-                                v-model.number="editForm.nilai[k.kode]"
-                                type="number"
-                                min="0"
-                                class="input input-bordered input-sm w-24 text-center bg-white text-gray-800"
-                                :class="(k.kelompok === 'Akumulasi' && totalAkumulasiEdit() !== TOTAL_HARI) || (k.kelompok === 'Independen' && editForm.nilai[k.kode] > TOTAL_HARI)
-                                    ? 'border-red-400 bg-red-50 text-red-700'
-                                    : 'border-gray-300 focus:border-blue-500'"
-                            />
-                            <span class="text-xs text-gray-400 w-8">
-                                {{ k.kelompok === 'Independen' ? 'kali' : 'hari' }}
-                            </span>
-                        </div>           
                     </div>
 
                     <!-- Tracker Total Akumulasi -->
-                    <div class="flex items-center justify-between pt-2 px-1">
-                        <span class="text-sm text-gray-500">Total Hari Absensi (Akumulasi)</span>
-                        <span class="text-sm font-semibold"
-                            :class="totalAkumulasiEdit() !== TOTAL_HARI ? 'text-red-600' : 'text-green-600'">
-                            {{ totalAkumulasiEdit() }} / {{ TOTAL_HARI }} hari
+                    <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-gray-100">
+                        <span class="text-sm font-semibold text-gray-600">Total Akumulasi</span>
+                        <span class="text-sm font-extrabold px-3 py-1 rounded-lg"
+                            :class="totalAkumulasiEdit() !== TOTAL_HARI ? 'bg-rose-100 text-rose-700' : 'bg-emerald-100 text-emerald-700'">
+                            {{ totalAkumulasiEdit() }} / {{ TOTAL_HARI }}
                         </span>
                     </div>
 
                     <!-- Alert Validasi Kesalahan -->
-                    <div v-if="totalAkumulasiEdit() !== TOTAL_HARI"
-                        class="flex items-center gap-2 px-3 py-2 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-700">
-                        <svg width="13" height="13" viewBox="0 0 12 12" fill="none">
-                            <circle cx="6" cy="6" r="5.5" stroke="#D97706" stroke-width="1.5"/>
-                            <path d="M6 3.5v3M6 8h.01" stroke="#D97706" stroke-width="1.5" stroke-linecap="round"/>
-                        </svg>
-                        Total kriteria akumulasi harus tepat berdurasi {{ TOTAL_HARI }} hari.
+                    <div v-if="totalAkumulasiEdit() > TOTAL_HARI"
+                        class="flex items-start gap-2.5 px-3 py-2.5 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-700 font-medium">
+                        <i class="fa-solid fa-triangle-exclamation text-rose-500 mt-0.5"></i>
+                        Total kriteria akumulasi melebihi {{ TOTAL_HARI }} hari kerja.
                     </div>
 
                     <div v-if="adaOverIndependenEdit()"
-                        class="flex items-center gap-2 px-3 py-2 bg-red-50 border border-red-200 rounded-lg text-xs text-red-700">
-                        <svg width="13" height="13" viewBox="0 0 12 12" fill="none">
-                            <circle cx="6" cy="6" r="5.5" stroke="#EF4444" stroke-width="1.5"/>
-                            <path d="M6 3.5v3M6 8h.01" stroke="#EF4444" stroke-width="1.5" stroke-linecap="round"/>
-                        </svg>
-                        Nilai kriteria independen tidak boleh melebihi {{ TOTAL_HARI }}.
+                        class="flex items-start gap-2.5 px-3 py-2.5 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-700 font-medium">
+                        <i class="fa-solid fa-triangle-exclamation text-rose-500 mt-0.5"></i>
+                        Nilai kriteria independen tidak boleh melebihi batas {{ TOTAL_HARI }} kali.
                     </div>
                 </div>
 
@@ -385,7 +360,7 @@ function getNilai(penilaianArr, kode) {
                     </button>
                     <button
                         @click="saveEdit"
-                        :disabled="editForm.processing || totalAkumulasiEdit() !== TOTAL_HARI || adaOverIndependenEdit()"
+                        :disabled="editForm.processing || totalAkumulasiEdit() > TOTAL_HARI || adaOverIndependenEdit()"
                         class="btn btn-sm bg-blue-600 hover:bg-blue-700 text-white border-none px-5"
                     >
                         <span v-if="editForm.processing"

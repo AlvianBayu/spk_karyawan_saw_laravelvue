@@ -60,6 +60,8 @@ Route::middleware('auth')->group(function () {
 
     // Transaksi Penilaian (Input Data Absensi)
     Route::resource('penilaian', PenilaianController::class);
+    Route::post('/penilaian/import', [PenilaianController::class, 'import'])->name('penilaian.import');
+    Route::get('/penilaian/download-template', [PenilaianController::class, 'downloadTemplate'])->name('penilaian.template');
     Route::delete('/penilaian/periode/{periodeId}', [App\Http\Controllers\PenilaianController::class, 'destroyByPeriode']);
 
     // Proses Perhitungan SAW & Ekspor

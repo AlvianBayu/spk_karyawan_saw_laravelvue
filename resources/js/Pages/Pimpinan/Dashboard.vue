@@ -151,89 +151,64 @@ onMounted(() => {
 </script>
 
 <template>
-    <Head title="SIKAP" />
+    <Head title="Dashboard Pimpinan - SIKAP" />
     <PimpinanLayout>
-        <div class="p-6 bg-white rounded-lg shadow-md">
+        <div class="p-6 sm:p-8 bg-white/80 backdrop-blur-md rounded-2xl shadow-xl border border-gray-100/50">
 
-            <div class="mb-5">
-                <h1 class="text-xl font-semibold text-gray-900">Dashboard</h1>
-                <p class="text-sm text-gray-500 mt-0.5">
+            <div class="mb-8">
+                <h1 class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-700 to-indigo-600 tracking-tight mb-2">
+                    Dashboard Pimpinan
+                </h1>
+                <p class="text-sm text-gray-500 font-medium">
                     Sistem Informasi Kinerja Aparatur Pegawai · Metode SAW
                 </p>
-                <div class="inline-flex items-center gap-1.5 mt-2 text-xs px-3 py-1
-                            rounded-full bg-green-100 text-green-700 font-medium
-                            border border-green-200">
-                    <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+                <div class="inline-flex items-center gap-2 mt-3 text-xs px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 font-bold border border-emerald-200/50 shadow-sm">
+                    <span class="relative flex h-2 w-2">
+                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                      <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                    </span>
                     Periode aktif: {{ namaPeriode }}
                 </div>
             </div>
 
-            <div class="grid grid-cols-4 gap-3 mb-5">
-                <div class="bg-slate-50 border border-gray-200 rounded-xl px-4 py-3 relative overflow-hidden">
-                    <div class="text-xs text-gray-400 uppercase tracking-wide font-medium">
-                        Total karyawan
-                    </div>
-                    <div class="text-2xl font-semibold text-gray-900 mt-1">
-                        {{ totalKaryawan }}
-                    </div>
-                    <div class="text-xs text-gray-400 mt-0.5">Terdaftar di sistem</div>
-                    <div class="absolute right-3 top-3 w-8 h-8 rounded-lg bg-blue-50
-                                flex items-center justify-center">
-                        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="#3B6DDD" stroke-width="1.5">
-                            <circle cx="6" cy="5" r="3"/>
-                            <path d="M1 14c0-3 2.5-5 5-5s5 2 5 5"/>
-                            <circle cx="12" cy="5" r="2"/>
-                            <path d="M14 14c0-2-1-3.5-2-4"/>
-                        </svg>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                <div class="bg-gradient-to-br from-white to-blue-50/30 border border-gray-100 rounded-2xl p-5 relative overflow-hidden shadow-sm hover:shadow-md transition-shadow group">
+                    <div class="absolute -right-6 -top-6 w-24 h-24 bg-blue-50 rounded-full blur-xl group-hover:bg-blue-100 transition-colors"></div>
+                    <div class="text-[11px] text-gray-500 uppercase tracking-widest font-bold mb-1 relative z-10">Total Pegawai</div>
+                    <div class="text-3xl font-extrabold text-blue-600 mb-1 relative z-10">{{ totalKaryawan }}</div>
+                    <div class="text-xs font-medium text-gray-400 relative z-10">Terdaftar di sistem</div>
+                    <div class="absolute right-4 top-4 w-10 h-10 rounded-xl bg-blue-100/50 flex items-center justify-center text-blue-600 shadow-sm">
+                        <i class="fa-solid fa-users"></i>
                     </div>
                 </div>
 
-                <div class="bg-slate-50 border border-gray-200 rounded-xl px-4 py-3 relative overflow-hidden">
-                    <div class="text-xs text-gray-400 uppercase tracking-wide font-medium">
-                        Total periode
-                    </div>
-                    <div class="text-2xl font-semibold text-green-600 mt-1">
-                        {{ totalPeriode }}
-                    </div>
-                    <div class="text-xs text-gray-400 mt-0.5">Periode sudah dinilai</div>
-                    <div class="absolute right-3 top-3 w-8 h-8 rounded-lg bg-green-50
-                                flex items-center justify-center">
-                        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="#639922" stroke-width="1.5">
-                            <rect x="1" y="3" width="14" height="12" rx="2"/>
-                            <path d="M1 7h14M5 1v4M11 1v4"/>
-                        </svg>
+                <div class="bg-gradient-to-br from-white to-emerald-50/30 border border-gray-100 rounded-2xl p-5 relative overflow-hidden shadow-sm hover:shadow-md transition-shadow group">
+                    <div class="absolute -right-6 -top-6 w-24 h-24 bg-emerald-50 rounded-full blur-xl group-hover:bg-emerald-100 transition-colors"></div>
+                    <div class="text-[11px] text-gray-500 uppercase tracking-widest font-bold mb-1 relative z-10">Total Periode</div>
+                    <div class="text-3xl font-extrabold text-emerald-600 mb-1 relative z-10">{{ totalPeriode }}</div>
+                    <div class="text-xs font-medium text-gray-400 relative z-10">Periode sudah dinilai</div>
+                    <div class="absolute right-4 top-4 w-10 h-10 rounded-xl bg-emerald-100/50 flex items-center justify-center text-emerald-600 shadow-sm">
+                        <i class="fa-solid fa-calendar-check"></i>
                     </div>
                 </div>
 
-                <div class="bg-slate-50 border border-gray-200 rounded-xl px-4 py-3 relative overflow-hidden">
-                    <div class="text-xs text-gray-400 uppercase tracking-wide font-medium">
-                        Rata-rata nilai SAW
-                    </div>
-                    <div class="text-2xl font-semibold text-blue-600 mt-1">
-                        {{ Number(rataRataAktif).toFixed(2) }}
-                    </div>
-                    <div class="text-xs text-gray-400 mt-0.5">Periode aktif</div>
-                    <div class="absolute right-3 top-3 w-8 h-8 rounded-lg bg-blue-50
-                                flex items-center justify-center">
-                        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="#378ADD" stroke-width="1.5">
-                            <path d="M2 12l4-4 3 3 5-6" stroke-linecap="round"/>
-                        </svg>
+                <div class="bg-gradient-to-br from-white to-amber-50/30 border border-gray-100 rounded-2xl p-5 relative overflow-hidden shadow-sm hover:shadow-md transition-shadow group">
+                    <div class="absolute -right-6 -top-6 w-24 h-24 bg-amber-50 rounded-full blur-xl group-hover:bg-amber-100 transition-colors"></div>
+                    <div class="text-[11px] text-gray-500 uppercase tracking-widest font-bold mb-1 relative z-10">Rata-rata (Aktif)</div>
+                    <div class="text-3xl font-extrabold text-amber-600 mb-1 relative z-10">{{ Number(rataRataAktif).toFixed(2) }}</div>
+                    <div class="text-xs font-medium text-gray-400 relative z-10">Periode saat ini</div>
+                    <div class="absolute right-4 top-4 w-10 h-10 rounded-xl bg-amber-100/50 flex items-center justify-center text-amber-600 shadow-sm">
+                        <i class="fa-solid fa-chart-line"></i>
                     </div>
                 </div>
 
-                <div class="bg-slate-50 border border-gray-200 rounded-xl px-4 py-3 relative overflow-hidden">
-                    <div class="text-xs text-gray-400 uppercase tracking-wide font-medium">
-                        Rata-rata keseluruhan
-                    </div>
-                    <div class="text-2xl font-semibold text-purple-600 mt-1">
-                        {{ Number(rataRataKeseluruhan).toFixed(2) }}
-                    </div>
-                    <div class="text-xs text-gray-400 mt-0.5">Semua periode</div>
-                    <div class="absolute right-3 top-3 w-8 h-8 rounded-lg bg-purple-50
-                                flex items-center justify-center">
-                        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="#7c3aed" stroke-width="1.5">
-                            <path d="M2 8h12M8 2v12" stroke-linecap="round"/>
-                        </svg>
+                <div class="bg-gradient-to-br from-white to-purple-50/30 border border-gray-100 rounded-2xl p-5 relative overflow-hidden shadow-sm hover:shadow-md transition-shadow group">
+                    <div class="absolute -right-6 -top-6 w-24 h-24 bg-purple-50 rounded-full blur-xl group-hover:bg-purple-100 transition-colors"></div>
+                    <div class="text-[11px] text-gray-500 uppercase tracking-widest font-bold mb-1 relative z-10">Rata-rata (Total)</div>
+                    <div class="text-3xl font-extrabold text-purple-600 mb-1 relative z-10">{{ Number(rataRataKeseluruhan).toFixed(2) }}</div>
+                    <div class="text-xs font-medium text-gray-400 relative z-10">Keseluruhan periode</div>
+                    <div class="absolute right-4 top-4 w-10 h-10 rounded-xl bg-purple-100/50 flex items-center justify-center text-purple-600 shadow-sm">
+                        <i class="fa-solid fa-chart-pie"></i>
                     </div>
                 </div>
             </div>

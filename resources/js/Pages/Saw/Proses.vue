@@ -12,6 +12,8 @@ const props = defineProps({
     weightedData:    Array,
     optimum:         Object,
     hasExistingData: Boolean,
+    progress100:     Boolean,
+    pendingCount:    Number,
 })
 
 const periodeId  = ref(props.periodeId ?? '')
@@ -140,7 +142,7 @@ function rankClass(r) {
             </div>
 
             <!-- Empty state -->
-            <div v-if="!periodeId || rawData.length === 0"
+            <div v-if="!periodeId || (periodeId && rawData.length === 0 && progress100)"
                 class="flex flex-col items-center justify-center py-20 text-center">
                 <div class="w-12 h-12 rounded-xl bg-blue-50 flex items-center
                             justify-center mb-3">
@@ -158,8 +160,25 @@ function rankClass(r) {
                 </p>
             </div>
 
+            <!-- Incomplete Progress State -->
+            <div v-else-if="periodeId && !progress100"
+                class="flex flex-col items-center justify-center py-20 text-center bg-rose-50/50 rounded-2xl border border-rose-200 mt-4">
+                <div class="w-16 h-16 rounded-2xl bg-rose-100 flex items-center
+                            justify-center mb-4">
+                    <i class="fa-solid fa-triangle-exclamation text-3xl text-rose-500"></i>
+                </div>
+                <h2 class="text-lg font-bold text-gray-800 mb-2">Progres Penginputan Belum 100%</h2>
+                <p class="text-sm text-gray-600 max-w-md leading-relaxed mb-6">
+                    Terdapat <strong class="text-rose-600 font-bold">{{ pendingCount }} pegawai</strong> yang datanya belum lengkap atau belum diinput pada periode ini. <br>Anda tidak dapat melakukan perhitungan SAW sebelum semua nilai pegawai lengkap.
+                </p>
+                <a :href="'/penilaian?periode_id=' + periodeId"
+                    class="btn bg-rose-600 hover:bg-rose-700 text-white border-none rounded-xl px-6 shadow-sm">
+                    Lengkapi Data Penilaian
+                </a>
+            </div>
+
             <!-- Tabel Perhitungan -->
-            <template v-else>
+            <template v-else-if="progress100 && rawData.length > 0">
                 <div class="flex items-center justify-between mb-3 flex-wrap gap-3">
                     <span class="text-sm font-medium text-gray-800">Matriks keputusan</span>
                     <div class="flex gap-1 p-1 bg-gray-100 rounded-lg">

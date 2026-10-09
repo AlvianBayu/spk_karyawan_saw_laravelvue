@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed, watch, onMounted } from "vue";
-import { router } from "@inertiajs/vue3";
+import { router, Head } from "@inertiajs/vue3";
 import MainLayout from "@/Layouts/MainLayout.vue";
 import Chart from "chart.js/auto";
 
@@ -8,13 +8,27 @@ const props = defineProps({
     hasil: Array,
     periodeList: Array,
     periodeId: [String, Number, null],
+    divisiList: Array,
 });
 
 const periodeId = ref(props.periodeId ?? "");
 const search = ref("");
+const filterDivisi = ref("");
 const activeTab = ref("all");
 const currentPage = ref(1);
-const perPage = 5;
+const perPage = 10;
+
+// Ekstrak daftar divisi unik dari props.divisiList atau hasil
+const listDivisi = computed(() => {
+    if (props.divisiList && props.divisiList.length) return props.divisiList;
+    if (!props.hasil) return [];
+    const divisiSet = new Set(
+        props.hasil
+            .map(h => h.divisi)
+            .filter(d => d && d !== '-')
+    );
+    return Array.from(divisiSet).sort();
+});
 
 // ── Watch periode ──
 watch(periodeId, (val) => {
@@ -52,21 +66,20 @@ const jumlahSanksi = computed(() => props.hasil.filter((h) => h.sanksi).length);
 // ── Filter & search ──
 const filteredHasil = computed(() => {
     return props.hasil.filter((h) => {
-        // 1. Amankan nama (jika null/kosong, jadikan string kosong)
-        // Jika nama ada di dalam relasi karyawan, kita pakai h.karyawan?.nama
-        const namaKaryawan = h.nama || h.karyawan?.nama || "";
-        
-        // 2. Paksa NIP menjadi String agar fungsi .includes() bisa berjalan
+        const namaKaryawan = h.nama || "";
         const nipKaryawan = String(h.nip || "");
 
-        // 3. Pencarian yang sudah aman dari error
         const matchSearch =
             namaKaryawan.toLowerCase().includes(search.value.toLowerCase()) ||
             nipKaryawan.includes(search.value);
             
         const matchTab = activeTab.value === "all" || h.sanksi;
         
-        return matchSearch && matchTab;
+        const matchDivisi = 
+            filterDivisi.value === "" || 
+            h.divisi === filterDivisi.value;
+        
+        return matchSearch && matchTab && matchDivisi;
     });
 });
 
@@ -125,11 +138,11 @@ function renderBarChart() {
     barChartInstance = new Chart(canvas, {
         type: "bar",
         data: {
-            labels: props.hasil.map((h) => h.nama),
+            labels: filteredHasil.value.map((h) => h.nama),
             datasets: [
                 {
                     label: "Nilai Akhir",
-                    data: props.hasil.map((h) =>
+                    data: filteredHasil.value.map((h) =>
                         Number(h.nilai_akhir).toFixed(2),
                     ),
                     backgroundColor: colors,
@@ -169,37 +182,42 @@ onMounted(() => {
     if (props.hasil.length) renderBarChart();
 });
 watch(
-    () => props.hasil,
+    () => [props.hasil, search.value, filterDivisi.value, activeTab.value],
     () => {
         currentPage.value = 1;
         setTimeout(renderBarChart, 100);
     },
+    { deep: true }
 );
 
 // ── Export ──
 function exportPDF() {
-    window.open(`/saw/export/pdf?periode_id=${periodeId.value}`, "_blank");
+    let url = `/saw/export/pdf?periode_id=${periodeId.value}`;
+    if (filterDivisi.value) url += `&divisi=${encodeURIComponent(filterDivisi.value)}`;
+    window.open(url, "_blank");
 }
 
 function exportExcel() {
-    window.open(`/saw/export/excel?periode_id=${periodeId.value}`, "_blank");
+    let url = `/saw/export/excel?periode_id=${periodeId.value}`;
+    if (filterDivisi.value) url += `&divisi=${encodeURIComponent(filterDivisi.value)}`;
+    window.open(url, "_blank");
 }
 </script>
 
 <template>
-    <Head title="" />
+    <Head title="Hasil SAW - SIKAP" />
     <MainLayout>
-        <div class="p-6 bg-white rounded-lg shadow-md">
+        <div class="p-6 sm:p-8 bg-white/80 backdrop-blur-md rounded-2xl shadow-xl border border-gray-100/50">
             <!-- Header -->
-            <div class="flex items-start justify-between mb-6 flex-wrap gap-3">
+            <div class="flex flex-col md:flex-row items-start justify-between mb-8 pb-6 border-b border-gray-100 gap-4">
                 <div>
-                    <h1 class="text-xl font-semibold text-gray-900">
+                    <h1 class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-700 to-indigo-600 tracking-tight flex items-center gap-3">
                         Hasil & Ranking SAW
                     </h1>
-                    <p class="text-sm text-gray-500 mt-1">
+                    <p class="text-sm text-gray-500 mt-2 font-medium">
                         <span v-if="periodeTerpilih">
-                            Menampilkan hasil penilaian ·
-                            <strong class="text-gray-700">
+                            Menampilkan hasil akhir evaluasi pegawai periode
+                            <strong class="text-gray-800 bg-gray-100 px-2 py-0.5 rounded ml-0.5">
                                 {{ periodeTerpilih.bulan }}
                                 {{ periodeTerpilih.tahun }}
                             </strong>
@@ -209,22 +227,15 @@ function exportExcel() {
                         >
                     </p>
                 </div>
-                <div class="flex items-center gap-2 flex-wrap">
+                <div class="flex items-center gap-3 flex-wrap">
                     <!-- Dropdown Periode -->
-                    <div class="relative">
-                        <svg
-                            class="absolute left-3 top-2.5 w-3.5 h-3.5 text-gray-400 pointer-events-none"
-                            viewBox="0 0 16 16"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="1.5"
-                        >
-                            <rect x="1" y="3" width="14" height="12" rx="2" />
-                            <path d="M1 7h14M5 1v4M11 1v4" />
-                        </svg>
+                    <div class="relative group">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fa-regular fa-calendar-days text-gray-400 group-hover:text-blue-500 transition-colors"></i>
+                        </div>
                         <select
                             v-model="periodeId"
-                            class="select select-bordered select-sm pl-8 min-w-[180px] bg-white text-gray-800 border-gray-300 shadow-sm"
+                            class="select bg-white text-gray-800 border-gray-200 shadow-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 pl-10 min-w-[200px] h-11 rounded-xl font-medium"
                         >
                             <option value="">-- Pilih Periode --</option>
                             <option
@@ -232,7 +243,7 @@ function exportExcel() {
                                 :key="p.id"
                                 :value="p.id"
                             >
-                                {{ p.bulan }} / {{ p.tahun }}
+                                {{ p.bulan }} {{ p.tahun }}
                             </option>
                         </select>
                     </div>
@@ -241,36 +252,16 @@ function exportExcel() {
                     <template v-if="hasil.length">
                         <button
                             @click="exportPDF"
-                            class="btn btn-sm border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 gap-1.5"
+                            class="btn h-11 px-5 border border-rose-200 bg-white hover:bg-rose-50 text-rose-600 shadow-sm rounded-xl font-semibold transition-all hover:border-rose-300"
                         >
-                            <svg
-                                width="13"
-                                height="13"
-                                viewBox="0 0 12 12"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="1.5"
-                            >
-                                <path d="M2 2h5l3 3v7H2z" />
-                                <path d="M7 2v3h3" />
-                            </svg>
+                            <i class="fa-regular fa-file-pdf mr-1.5 text-lg"></i>
                             PDF
                         </button>
                         <button
                             @click="exportExcel"
-                            class="btn btn-sm border border-green-200 bg-green-50 text-green-700 hover:bg-green-100 gap-1.5"
+                            class="btn h-11 px-5 border border-emerald-200 bg-white hover:bg-emerald-50 text-emerald-600 shadow-sm rounded-xl font-semibold transition-all hover:border-emerald-300"
                         >
-                            <svg
-                                width="13"
-                                height="13"
-                                viewBox="0 0 12 12"
-                                fill="none"
-                                stroke="currentColor"
-                                stroke-width="1.5"
-                            >
-                                <path d="M2 2h5l3 3v7H2z" />
-                                <path d="M7 2v3h3" />
-                            </svg>
+                            <i class="fa-regular fa-file-excel mr-1.5 text-lg"></i>
                             Excel
                         </button>
                     </template>
@@ -280,7 +271,7 @@ function exportExcel() {
             <!-- Empty State -->
             <div
                 v-if="!periodeId"
-                class="flex flex-col items-center justify-center py-24 text-center"
+                class="flex flex-col items-center justify-center py-20 text-center bg-slate-50/50 rounded-3xl border border-dashed border-gray-200"
             >
                 <div
                     class="w-14 h-14 rounded-2xl bg-indigo-50 flex items-center justify-center mb-4"
@@ -365,229 +356,165 @@ function exportExcel() {
             <!-- Data Section -->
             <template v-else>
                 <!-- Stat Cards -->
-                <div class="grid grid-cols-4 gap-3 mb-6">
-                    <div
-                        class="bg-slate-50 border border-gray-200 rounded-xl px-4 py-3"
-                    >
-                        <div
-                            class="text-xs text-gray-400 uppercase tracking-wide font-medium"
-                        >
-                            Total Pegawai
-                        </div>
-                        <div class="text-2xl font-semibold text-gray-900 mt-1">
-                            {{ totalKaryawan }}
-                        </div>
-                        <div class="text-xs text-gray-400 mt-0.5">
-                            {{ periodeTerpilih?.bulan }}
-                            {{ periodeTerpilih?.tahun }}
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                    <div class="bg-gradient-to-br from-white to-slate-50 border border-gray-100 rounded-2xl p-5 relative overflow-hidden shadow-sm hover:shadow-md transition-shadow group">
+                        <div class="absolute -right-6 -top-6 w-24 h-24 bg-blue-50 rounded-full blur-xl group-hover:bg-blue-100 transition-colors"></div>
+                        <div class="text-[11px] text-gray-500 uppercase tracking-widest font-bold mb-1 relative z-10">Total Evaluasi</div>
+                        <div class="text-3xl font-extrabold text-gray-900 mb-1 relative z-10">{{ totalKaryawan }}</div>
+                        <div class="text-xs text-gray-400 font-medium relative z-10">Pegawai dinilai</div>
+                        <div class="absolute right-4 top-4 w-10 h-10 rounded-xl bg-blue-100/50 flex items-center justify-center text-blue-600 shadow-sm">
+                            <i class="fa-solid fa-users"></i>
                         </div>
                     </div>
-                    <div
-                        class="bg-slate-50 border border-gray-200 rounded-xl px-4 py-3"
-                    >
-                        <div
-                            class="text-xs text-gray-400 uppercase tracking-wide font-medium"
-                        >
-                            Nilai Tertinggi
-                        </div>
-                        <div class="text-2xl font-semibold text-green-600 mt-1">
-                            {{ Number(nilaiTertinggi.nilai).toFixed(2) }}
+                    
+                    <div class="bg-gradient-to-br from-white to-emerald-50/30 border border-gray-100 rounded-2xl p-5 relative overflow-hidden shadow-sm hover:shadow-md transition-shadow group">
+                        <div class="absolute -right-6 -top-6 w-24 h-24 bg-emerald-50 rounded-full blur-xl group-hover:bg-emerald-100 transition-colors"></div>
+                        <div class="text-[11px] text-gray-500 uppercase tracking-widest font-bold mb-1 relative z-10">Nilai Tertinggi</div>
+                        <div class="text-3xl font-extrabold text-emerald-600 mb-1 relative z-10">{{ Number(nilaiTertinggi.nilai).toFixed(2) }}</div>
+                        <div class="text-xs text-gray-400 font-medium relative z-10">{{ nilaiTertinggi.nama }}</div>
+                        <div class="absolute right-4 top-4 w-10 h-10 rounded-xl bg-emerald-100/50 flex items-center justify-center text-emerald-600 shadow-sm">
+                            <i class="fa-solid fa-trophy"></i>
                         </div>
                     </div>
-                    <div
-                        class="bg-slate-50 border border-gray-200 rounded-xl px-4 py-3"
-                    >
-                        <div
-                            class="text-xs text-gray-400 uppercase tracking-wide font-medium"
-                        >
-                            Nilai Rata-rata
-                        </div>
-                        <div class="text-2xl font-semibold text-blue-600 mt-1">
-                            {{ nilaiRataRata }}
-                        </div>
-                        <div class="text-xs text-gray-400 mt-0.5">
-                            Dari {{ totalKaryawan }} karyawan
+                    
+                    <div class="bg-gradient-to-br from-white to-indigo-50/30 border border-gray-100 rounded-2xl p-5 relative overflow-hidden shadow-sm hover:shadow-md transition-shadow group">
+                        <div class="absolute -right-6 -top-6 w-24 h-24 bg-indigo-50 rounded-full blur-xl group-hover:bg-indigo-100 transition-colors"></div>
+                        <div class="text-[11px] text-gray-500 uppercase tracking-widest font-bold mb-1 relative z-10">Rata-Rata Nilai</div>
+                        <div class="text-3xl font-extrabold text-indigo-600 mb-1 relative z-10">{{ nilaiRataRata }}</div>
+                        <div class="text-xs text-gray-400 font-medium relative z-10">Keseluruhan pegawai</div>
+                        <div class="absolute right-4 top-4 w-10 h-10 rounded-xl bg-indigo-100/50 flex items-center justify-center text-indigo-600 shadow-sm">
+                            <i class="fa-solid fa-chart-line"></i>
                         </div>
                     </div>
-                    <div
-                        class="bg-slate-50 border border-gray-200 rounded-xl px-4 py-3"
-                    >
-                        <div
-                            class="text-xs text-gray-400 uppercase tracking-wide font-medium"
-                        >
-                            Bersanksi
+                    
+                    <div class="bg-gradient-to-br from-white to-rose-50/30 border border-gray-100 rounded-2xl p-5 relative overflow-hidden shadow-sm hover:shadow-md transition-shadow group">
+                        <div class="absolute -right-6 -top-6 w-24 h-24 bg-rose-50 rounded-full blur-xl group-hover:bg-rose-100 transition-colors"></div>
+                        <div class="text-[11px] text-gray-500 uppercase tracking-widest font-bold mb-1 relative z-10">Pegawai Bersanksi</div>
+                        <div class="text-3xl font-extrabold mb-1 relative z-10" :class="jumlahSanksi > 0 ? 'text-rose-600' : 'text-gray-400'">{{ jumlahSanksi }}</div>
+                        <div class="text-xs text-gray-400 font-medium relative z-10">
+                            {{ jumlahSanksi > 0 ? "Teguran atau potongan tunkin" : "Disiplin sangat baik" }}
                         </div>
-                        <div
-                            class="text-2xl font-semibold mt-1"
-                            :class="
-                                jumlahSanksi > 0
-                                    ? 'text-red-600'
-                                    : 'text-gray-400'
-                            "
-                        >
-                            {{ jumlahSanksi }}
-                        </div>
-                        <div class="text-xs text-gray-400 mt-0.5">
-                            {{
-                                jumlahSanksi > 0
-                                    ? "Teguran · potongan tunkin"
-                                    : "Tidak ada sanksi"
-                            }}
+                        <div class="absolute right-4 top-4 w-10 h-10 rounded-xl flex items-center justify-center shadow-sm" :class="jumlahSanksi > 0 ? 'bg-rose-100/80 text-rose-600' : 'bg-gray-100 text-gray-400'">
+                            <i class="fa-solid fa-triangle-exclamation"></i>
                         </div>
                     </div>
                 </div>
 
-                <!-- Toolbar -->
-                <div
-                    class="flex items-center justify-between mb-3 flex-wrap gap-3"
-                >
-                    <div class="relative">
-                        <svg
-                            class="absolute left-2.5 top-2 w-4 h-4 text-gray-400"
-                            viewBox="0 0 16 16"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="1.5"
-                        >
-                            <circle cx="6.5" cy="6.5" r="4.5" />
-                            <path d="M10 10l3 3" />
-                        </svg>
-                        <input
-                            v-model="search"
-                            type="text"
-                            placeholder="Cari karyawan..."
-                            class="input input-bordered input-sm pl-8 w-56 bg-white border-gray-300 text-gray-800 shadow-sm"
-                        />
+                <!-- Toolbar & Filters -->
+                <div class="flex flex-col md:flex-row items-center justify-between mb-4 flex-wrap gap-4 bg-slate-50 border border-gray-100 p-2 pl-3 rounded-2xl shadow-sm">
+                    <div class="flex items-center gap-3 w-full md:w-auto">
+                        <!-- Search -->
+                        <div class="relative w-full md:w-56">
+                            <i class="fa-solid fa-search absolute left-3 top-2.5 text-gray-400"></i>
+                            <input
+                                v-model="search"
+                                type="text"
+                                placeholder="Cari pegawai / NIP..."
+                                class="input input-sm h-9 pl-9 w-full bg-white border-gray-200 text-gray-800 rounded-xl shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                            />
+                        </div>
+                        
+                        <!-- Divisi Filter -->
+                        <div class="relative w-full md:w-48">
+                            <i class="fa-solid fa-layer-group absolute left-3 top-2.5 text-gray-400"></i>
+                            <select
+                                v-model="filterDivisi"
+                                class="select select-sm h-9 pl-9 w-full bg-white border-gray-200 text-gray-800 rounded-xl shadow-sm focus:border-blue-500 font-medium"
+                            >
+                                <option value="">Semua Divisi</option>
+                                <option v-for="d in listDivisi" :key="d" :value="d">{{ d }}</option>
+                            </select>
+                        </div>
                     </div>
-                    <div class="flex gap-1.5 p-1 bg-gray-200/60 rounded-lg">
+
+                    <!-- Tabs Sanksi -->
+                    <div class="flex gap-1.5 p-1 bg-white border border-gray-200 rounded-xl shadow-sm w-full md:w-auto">
                         <button
                             v-for="tab in [
-                                {
-                                    key: 'all',
-                                    label: 'Semua',
-                                    count: hasil.length,
-                                },
-                                {
-                                    key: 'sanksi',
-                                    label: 'Bersanksi',
-                                    count: jumlahSanksi,
-                                },
+                                { key: 'all', label: 'Semua Karyawan', count: filteredHasil.length + (activeTab === 'sanksi' ? (hasil.length - filteredHasil.length) : 0) },
+                                { key: 'sanksi', label: 'Bersanksi Saja', count: jumlahSanksi }
                             ]"
                             :key="tab.key"
                             @click="activeTab = tab.key"
-                            class="btn btn-xs rounded-md px-4 border-none transition-all"
+                            class="btn btn-sm h-8 rounded-lg px-4 border-none transition-all font-semibold text-xs"
                             :class="
                                 activeTab === tab.key
-                                    ? 'bg-white text-gray-900 shadow-sm font-semibold hover:bg-white'
-                                    : 'bg-transparent text-gray-500 font-normal shadow-none'
+                                    ? 'bg-blue-50 text-blue-700 hover:bg-blue-100'
+                                    : 'bg-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50'
                             "
                         >
-                            {{ tab.label }} ({{ tab.count }})
+                            <i :class="tab.key === 'sanksi' ? 'fa-solid fa-triangle-exclamation mr-1.5' : 'fa-solid fa-list mr-1.5'"></i>
+                            {{ tab.label }}
                         </button>
                     </div>
                 </div>
 
                 <!-- Tabel Ranking -->
-                <div
-                    class="border border-gray-200 rounded-xl overflow-hidden shadow-sm mb-3"
-                >
+                <div class="border border-gray-200 rounded-2xl overflow-hidden shadow-sm mb-4 bg-white">
                     <div class="overflow-x-auto">
-                        <table class="table table-sm w-full">
-                            <thead class="bg-slate-100">
+                        <table class="table w-full">
+                            <thead class="bg-slate-50 border-b border-gray-100">
                                 <tr>
-                                    <th
-                                        class="text-gray-700 font-semibold py-3 px-4 text-xs uppercase tracking-wide w-14"
-                                    >
-                                        No
-                                    </th>
-                                    <th
-                                        class="text-gray-700 font-semibold py-3 px-4 text-xs uppercase tracking-wide"
-                                    >
-                                        Karyawan
-                                    </th>
-                                    <th
-                                        class="text-center text-gray-700 font-semibold py-3 text-xs uppercase tracking-wide"
-                                    >
-                                        Nilai Akhir
-                                    </th>
-                                    <th
-                                        class="text-center text-gray-700 font-semibold py-3 text-xs uppercase tracking-wide"
-                                    >
-                                        Sanksi
-                                    </th>
-                                    <th
-                                        class="text-center text-gray-700 font-semibold py-3 text-xs uppercase tracking-wide"
-                                    >
-                                        Potongan Tunkin
-                                    </th>
+                                    <th class="text-gray-500 font-bold py-4 px-5 text-[10px] uppercase tracking-widest w-16 text-center">Global Rank</th>
+                                    <th class="text-gray-500 font-bold py-4 px-5 text-[10px] uppercase tracking-widest text-left">Pegawai</th>
+                                    <th class="text-gray-500 font-bold py-4 px-5 text-[10px] uppercase tracking-widest text-left">Divisi</th>
+                                    <th class="text-center text-gray-500 font-bold py-4 px-5 text-[10px] uppercase tracking-widest">Nilai Akhir</th>
+                                    <th class="text-center text-gray-500 font-bold py-4 px-5 text-[10px] uppercase tracking-widest">Sanksi</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody class="divide-y divide-gray-50">
                                 <tr
-                                    v-for="h in pagedHasil"
+                                    v-for="(h, index) in pagedHasil"
                                     :key="h.nip"
-                                    class="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors"
+                                    class="hover:bg-blue-50/40 transition-colors"
                                 >
-                                    <td class="px-4 py-3 text-center">
-                                        <span
-                                            class="inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-medium"
-                                            :class="rankClass(h.peringkat)"
-                                        >
-                                            {{ h.peringkat }}
-                                        </span>
-                                    </td>
-                                    <td class="px-4 py-3">
-                                        <div
-                                            class="font-medium text-sm text-gray-900"
-                                        >
-                                            {{ h.nama }}
-                                        </div>
-                                        <div
-                                            class="text-xs text-gray-400 font-mono mt-0.5"
-                                        >
-                                            {{ h.jabatan }} · #{{ h.nip }}
+                                    <td class="px-5 py-4 text-center">
+                                        <div class="flex flex-col items-center gap-1">
+                                            <span class="inline-flex items-center justify-center w-8 h-8 rounded-full text-sm font-extrabold shadow-sm" :class="rankClass(h.peringkat)">
+                                                {{ h.peringkat }}
+                                            </span>
+                                            <!-- Peringkat Relatif Filter -->
+                                            <span v-if="filterDivisi" class="text-[10px] text-gray-400 font-medium">Rank #{{ (currentPage - 1) * perPage + index + 1 }} di filter</span>
                                         </div>
                                     </td>
-                                    <td
-                                        class="text-center py-3 font-semibold text-gray-800"
-                                    >
-                                        {{ Number(h.nilai_akhir).toFixed(2) }}
+                                    <td class="px-5 py-4">
+                                        <div class="font-bold text-sm text-gray-900">{{ h.nama }}</div>
+                                        <div class="text-xs text-gray-400 font-mono mt-0.5">
+                                            {{ h.jabatan }} <span class="mx-1 text-gray-300">|</span> NIP: {{ h.nip }}
+                                        </div>
                                     </td>
-                                    <td class="text-center py-3">
-                                        <span
-                                            v-if="h.sanksi"
-                                            class="text-xs px-2.5 py-1 rounded-full font-medium bg-amber-100 text-amber-700 border border-amber-200"
-                                        >
-                                            {{ h.sanksi }}
+                                    <td class="px-5 py-4">
+                                        <span v-if="h.divisi && h.divisi !== '-'" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-100/50">
+                                            <i class="fa-solid fa-layer-group text-[10px] opacity-70"></i>
+                                            {{ h.divisi }}
                                         </span>
-                                        <span
-                                            v-else
-                                            class="text-gray-300 text-sm"
-                                            >—</span
-                                        >
                                     </td>
-                                    <td class="text-center py-3">
-                                        <span
-                                            v-if="h.potongan > 0"
-                                            class="text-xs px-2.5 py-1 rounded-full font-medium bg-red-100 text-red-600 border border-red-200"
-                                        >
-                                            {{ h.potongan }}%
-                                        </span>
-                                        <span
-                                            v-else
-                                            class="text-xs px-2.5 py-1 rounded-full font-medium bg-gray-100 text-gray-400"
-                                        >
-                                            0%
-                                        </span>
+                                    <td class="text-center py-4">
+                                        <div class="inline-flex items-center justify-center px-4 py-1.5 rounded-xl bg-gray-50 border border-gray-200 shadow-inner font-extrabold text-blue-700">
+                                            {{ Number(h.nilai_akhir).toFixed(4) }}
+                                        </div>
+                                    </td>
+                                    <td class="text-center py-4">
+                                        <div class="flex flex-col items-center gap-1">
+                                            <span v-if="h.sanksi" class="text-[10px] px-2 py-0.5 rounded font-bold uppercase tracking-wide bg-amber-100 text-amber-800">
+                                                {{ h.sanksi }}
+                                            </span>
+                                            <span v-if="h.potongan > 0" class="text-[10px] px-2 py-0.5 rounded font-bold uppercase tracking-wide bg-rose-100 text-rose-700">
+                                                -{{ h.potongan }}% Tunkin
+                                            </span>
+                                            <span v-if="!h.sanksi && !(h.potongan > 0)" class="text-gray-300 text-lg">
+                                                <i class="fa-solid fa-minus"></i>
+                                            </span>
+                                        </div>
                                     </td>
                                 </tr>
 
                                 <tr v-if="pagedHasil.length === 0">
-                                    <td
-                                        colspan="5"
-                                        class="text-center py-10 text-gray-400 text-sm"
-                                    >
-                                        Tidak ada data yang cocok.
+                                    <td colspan="5" class="text-center py-12 bg-slate-50/50">
+                                        <div class="flex flex-col items-center justify-center text-gray-400">
+                                            <i class="fa-solid fa-inbox text-4xl mb-3 text-gray-300"></i>
+                                            <p class="font-medium">Tidak ada data pegawai yang cocok dengan pencarian atau filter.</p>
+                                        </div>
                                     </td>
                                 </tr>
                             </tbody>

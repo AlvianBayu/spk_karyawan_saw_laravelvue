@@ -43,7 +43,7 @@
     <div class="header">
         <h1>LAPORAN HASIL PENILAIAN PEGAWAI</h1>
         <p>Sistem Informasi Kedisiplinan Pegawai (SIKAP) · Metode SAW</p>
-        <p>Periode: {{ $periode->bulan }} / {{ $periode->tahun }}</p>
+        <p>Periode: {{ $periode->bulan }} / {{ $periode->tahun }} | Divisi: {{ $divisi ?? 'Semua Divisi' }}</p>
     </div>
 
     <table>
@@ -52,6 +52,7 @@
                 <th class="center">No</th>
                 <th>NIP</th>
                 <th>Nama Pegawai</th>
+                <th>Divisi</th>
                 <th class="center">Nilai Akhir</th>
                 <th class="center">Sanksi</th>
                 <th class="center">Alpa</th>
@@ -68,6 +69,7 @@
                 </td>
                 <td style="font-family:monospace">{{ $h->nip }}</td>
                 <td><strong>{{ $h->karyawan?->nama ?? $h->karyawan?->nama_karyawan ?? 'Karyawan Resign' }}</strong></td>
+                <td>{{ $h->karyawan?->divisi ?? '-' }}</td>
                 <td class="center"><strong>{{ number_format($h->nilai_akhir, 2) }}</strong></td>
                 <td class="center">
                     @if($h->sanksi)

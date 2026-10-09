@@ -96,9 +96,9 @@ onMounted(() => {
 </script>
 
 <template>
-    <Head title="" />
+    <Head title="Detail Pegawai - SIKAP" />
     <MainLayout>
-        <div class="p-6 bg-white rounded-lg shadow-md">
+        <div class="p-6 sm:p-8 bg-white/80 backdrop-blur-md rounded-2xl shadow-xl border border-gray-100/50">
 
             <!-- Back -->
             <a href="/karyawan"
@@ -112,52 +112,75 @@ onMounted(() => {
             </a>
 
             <!-- Profile Card -->
-            <div class="flex items-center gap-4 p-4 border border-gray-200
-                        rounded-xl bg-slate-50 mb-5">
-                <div class="w-14 h-14 rounded-full bg-blue-100 flex items-center
-                            justify-center text-blue-700 font-semibold text-lg flex-shrink-0">
+            <div class="flex flex-col sm:flex-row items-center sm:items-start gap-5 p-6 border border-gray-100
+                        rounded-2xl bg-gradient-to-br from-slate-50 to-white shadow-sm mb-6 relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-bl-full -z-10 opacity-60"></div>
+                
+                <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center
+                            justify-center text-white font-bold text-2xl flex-shrink-0 shadow-lg shadow-blue-500/30">
                     {{ initials(nama) }}
                 </div>
-                <div>
-                    <div class="text-lg font-semibold text-gray-900">{{ nama }}</div>
-                    <div class="text-xs text-gray-400 font-mono mt-0.5">
-                        {{ karyawan.jabatan }} · #{{ karyawan.nip }}
+                <div class="text-center sm:text-left flex-1">
+                    <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-1">
+                        <h2 class="text-2xl font-bold text-gray-900 tracking-tight">{{ nama }}</h2>
+                        <span 
+                            class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold self-center"
+                            :class="(karyawan.status || '').toLowerCase() === 'aktif' ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'"
+                        >
+                            {{ karyawan.status }}
+                        </span>
+                    </div>
+                    <div class="text-sm text-gray-500 font-mono mt-0.5 mb-2">
+                        <span class="text-blue-600 font-medium">{{ karyawan.jabatan }}</span> <span class="mx-1 text-gray-300">|</span> NIP: {{ karyawan.nip }}
+                    </div>
+                    <div class="inline-flex items-center">
+                        <span v-if="karyawan.divisi" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-sm font-medium bg-indigo-50 text-indigo-700 border border-indigo-100/50">
+                            <i class="fa-solid fa-layer-group text-xs opacity-70"></i>
+                            {{ karyawan.divisi }}
+                        </span>
+                        <span v-else class="text-gray-400 text-sm italic">Divisi belum diatur</span>
                     </div>
                 </div>
             </div>
 
             <!-- Stat Cards -->
-            <div class="grid grid-cols-3 gap-3 mb-5">
-                <div class="bg-slate-50 border border-gray-200 rounded-xl px-4 py-3">
-                    <div class="text-xs text-gray-400 uppercase tracking-wide font-medium">
-                        Total periode dinilai
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+                <div class="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow">
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="text-xs text-gray-500 uppercase tracking-wider font-semibold">Total Periode</div>
+                        <div class="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600">
+                            <i class="fa-regular fa-calendar-check"></i>
+                        </div>
                     </div>
-                    <div class="text-2xl font-semibold text-gray-900 mt-1">
-                        {{ totalPeriode }}
-                    </div>
-                    <div class="text-xs text-gray-400 mt-0.5">Periode</div>
+                    <div class="text-3xl font-bold text-gray-900 mb-1">{{ totalPeriode }}</div>
+                    <div class="text-xs text-gray-400 font-medium">Kali penilaian masuk</div>
                 </div>
-                <div class="bg-slate-50 border border-gray-200 rounded-xl px-4 py-3">
-                    <div class="text-xs text-gray-400 uppercase tracking-wide font-medium">
-                        Rata-rata nilai SAW
+                
+                <div class="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow">
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="text-xs text-gray-500 uppercase tracking-wider font-semibold">Rata-rata SAW</div>
+                        <div class="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600">
+                            <i class="fa-solid fa-chart-line"></i>
+                        </div>
                     </div>
-                    <div class="text-2xl font-semibold text-blue-600 mt-1">
+                    <div class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 mb-1">
                         {{ Number(rataRataSaw).toFixed(2) }}
                     </div>
-                    <div class="text-xs text-gray-400 mt-0.5">
-                        Dari {{ totalPeriode }} periode
-                    </div>
+                    <div class="text-xs text-gray-400 font-medium">Dari {{ totalPeriode }} periode</div>
                 </div>
-                <div class="bg-slate-50 border border-gray-200 rounded-xl px-4 py-3">
-                    <div class="text-xs text-gray-400 uppercase tracking-wide font-medium">
-                        Total sanksi
+                
+                <div class="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow">
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="text-xs text-gray-500 uppercase tracking-wider font-semibold">Total Sanksi</div>
+                        <div class="w-8 h-8 rounded-lg flex items-center justify-center" :class="totalSanksi > 0 ? 'bg-rose-50 text-rose-600' : 'bg-gray-50 text-gray-400'">
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+                        </div>
                     </div>
-                    <div class="text-2xl font-semibold mt-1"
-                        :class="totalSanksi > 0 ? 'text-red-600' : 'text-gray-400'">
+                    <div class="text-3xl font-bold mb-1" :class="totalSanksi > 0 ? 'text-rose-600' : 'text-gray-900'">
                         {{ totalSanksi }}
                     </div>
-                    <div class="text-xs text-gray-400 mt-0.5">
-                        {{ totalSanksi > 0 ? 'Teguran' : 'Tidak ada sanksi' }}
+                    <div class="text-xs font-medium" :class="totalSanksi > 0 ? 'text-rose-500' : 'text-emerald-500'">
+                        {{ totalSanksi > 0 ? 'Teguran akumulatif' : 'Disiplin baik, tidak ada sanksi' }}
                     </div>
                 </div>
             </div>

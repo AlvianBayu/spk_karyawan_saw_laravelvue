@@ -23,9 +23,18 @@ class KaryawanController extends Controller
     {
         // Mengambil semua data karyawan, diurutkan dari yang terbaru
         $karyawan = Karyawan::latest()->get();
+
+        // Ambil daftar divisi unik untuk filter dropdown
+        $divisiList = Karyawan::whereNotNull('divisi')
+            ->where('divisi', '!=', '')
+            ->distinct()
+            ->pluck('divisi')
+            ->sort()
+            ->values();
         
         return Inertia::render('Karyawan/Index', [
-            'karyawan' => $karyawan
+            'karyawan'   => $karyawan,
+            'divisiList'  => $divisiList,
         ]);
     }
 
@@ -34,8 +43,9 @@ class KaryawanController extends Controller
     {
         // Mengubah integer menjadi numeric, dan menghapus spasi pada aturan 'in'
         $request->validate([
-            'nip' => 'required|numeric|unique:karyawan,nip',
-            'nama' => 'required|string|max:255',
+            'nip'    => 'required|numeric|unique:karyawan,nip',
+            'nama'   => 'required|string|max:255',
+            'divisi' => 'nullable|string|max:100',
             'status' => 'required|in:Aktif,Non-Aktif', 
         ]);
 
@@ -51,8 +61,9 @@ class KaryawanController extends Controller
 
         // Mengubah integer menjadi numeric, dan menghapus spasi pada aturan 'in'
         $request->validate([
-            'nip' => 'required|numeric|unique:karyawan,nip,' . $id, // Abaikan NIP milik sendiri
-            'nama' => 'required|string|max:255',
+            'nip'    => 'required|numeric|unique:karyawan,nip,' . $id, // Abaikan NIP milik sendiri
+            'nama'   => 'required|string|max:255',
+            'divisi' => 'nullable|string|max:100',
             'status' => 'required|in:Aktif,Non-Aktif', 
         ]);
 
